@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pin Ball s logem Wabtec Corporation</title>
+    <style>
+        #game-area {
+            width: 300px;
+            height: 400px;
+            border: 2px solid black;
+            position: relative;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+        #ball {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+            z-index: 2;
+        }
+        #flipper {
+            width: 100px;
+            height: 20px;
+            background-color: blue;
+            position: absolute;
+            bottom: 20px;
+            left: 100px;
+            transform-origin: center left;
+            transition: transform 0.1s;
+            z-index: 2;
+        }
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            z-index: 2;
+        }
+        #logo-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1;
+        }
+        #logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.3);
+            white-space: nowrap;
+        }
+        #subtext {
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.3);
+            white-space: nowrap;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-area">
+        <div id="logo-container">
+            <div id="logo">Wabtec Corporation</div>
+            <div id="subtext">Když nepřijdou kabely...</div>
+        </div>
+        <div id="ball"></div>
+        <div id="flipper"></div>
+        <div id="score">Skóre: <span id="score-value">0</span></div>
+    </div>
+
+    <script>
+        // Zde zůstává stejný JavaScript kód jako v předchozí verzi
+        const ball = document.getElementById('ball');
+        const flipper = document.getElementById('flipper');
+        const scoreElement = document.getElementById('score-value');
+        const gameArea = document.getElementById('game-area');
+
+        let ballX = 150;
+        let ballY = 200;
+        let ballSpeedX = 2;
+        let ballSpeedY = -2;
+        let score = 0;
+        let flipperAngle = 0;
+        let flipperX = 100;
+
+        function moveBall() {
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            if (ballX < 10 || ballX > 270) ballSpeedX = -ballSpeedX;
+            if (ballY < 10) ballSpeedY = -ballSpeedY;
+
+            let flipperY = 360;
+            let flipperEndX = flipperX + 100;
+            
+            if (ballY + 10 > flipperY && ballY < flipperY + 20 && 
+                ballX + 10 > flipperX && ballX < flipperEndX) {
+                if (flipperAngle < 0) {
+                    ballSpeedY = -Math.abs(ballSpeedY) - 1;
+                    ballSpeedX += (ballX - (flipperX + 50)) / 10;
+                    score += 10;
+                    scoreElement.textContent = score;
+                } else {
+                    ballY = flipperY - 20;
+                    ballSpeedY = -ballSpeedY;
+                }
+            }
+
+            if (ballY > 400) {
+                alert('Konec hry! Vaše skóre: ' + score);
+                resetGame();
+            }
+
+            ball.style.left = ballX + 'px';
+            ball.style.top = ballY + 'px';
+
+            requestAnimationFrame(moveBall);
+        }
+
+        function resetGame() {
+            ballX = 150;
+            ballY = 200;
+            ballSpeedX = 2;
+            ballSpeedY = -2;
+            score = 0;
+            flipperX = 100;
+            flipperAngle = 0;
+            scoreElement.textContent = score;
+            updateFlipperPosition();
+        }
+
+        function updateFlipperPosition() {
+            flipper.style.left = flipperX + 'px';
+            flipper.style.transform = `rotate(${flipperAngle}deg)`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                flipperAngle = -45;
+            } else if (e.code === 'ArrowLeft') {
+                flipperX = Math.max(0, flipperX - 10);
+            } else if (e.code === 'ArrowRight') {
+                flipperX = Math.min(200, flipperX + 10);
+            }
+            updateFlipperPosition();
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'Space') {
+                flipperAngle = 0;
+                updateFlipperPosition();
+            }
+        });
+
+        moveBall();
+    </script>
+</body>
+</html>
